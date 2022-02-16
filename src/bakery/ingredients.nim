@@ -27,7 +27,11 @@ proc inferType*(val: string): JsonNodeKind =
     else:
       return JFloat
   except ValueError:
-    return JString
+    case s:
+      of "TRUE", "FALSE":
+        return JBool
+      else:
+        return JString
 
 proc inferType*(vals: seq[string]): JsonNodeKind =
   let ts = collect:
@@ -41,35 +45,38 @@ proc inferType*(vals: seq[string]): JsonNodeKind =
     return JFloat
   elif ts <= [JString, JNull].toHashSet:
     return JString
-  raise newException(ValueError, "Incompatible types: " & $ts)
+  elif ts <= [JBool, JNull].toHashSet:
+    return JBool
+  else:
+    raise newException(ValueError, "Incompatible types: " & $ts)
 
 proc inferTypes(rows: seq[Row], header: Row): seq[JsonNodeKind] =
   result = newSeq[JsonNodeKind](header.len)
   for i, c in header.pairs: # Header column names actually unused here.
     result[i] = rows.map((r) => r[i]).inferType
 
-proc `%`(k: JsonNodeKind, s: string): JsonNode =
+proc `%`(k: JsonNodeKind, val: string): JsonNode =
   ## Convert string to JsonNode. Sanity checking should already have been done by `inferType`.
-  let ss = s.strip()
-  if ss == "":
+  let s = val.strip()
+  if s == "":
     return newJNull()
   case k:
     of JNull:
       return newJNull()
     of JBool:
-      case ss:
+      case s:
         of "TRUE":
           return %true
         of "FALSE":
           return %false
     of JInt:
-      return %ss.parseInt
+      return %s.parseInt
     of JFloat:
-      return %ss.parseFloat
+      return %s.parseFloat
     of JString:
-      return %ss # TODO drop backslash and quote?
+      return %s # TODO drop backslash and quote?
     else:
-      raise newException(ValueError, "Unsupported node kind: " & $k)
+      raise newException(ValueError, "Unsupported node kind: " & $k & " containing: " & s & ".")
 
 proc shop*(paths: seq[string]): JsonNode =
   ## Shop for ingredients (get data). Reads everything into memory!

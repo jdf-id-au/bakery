@@ -23,6 +23,7 @@ assert "1.0".inferType == JInt
 assert "1.1".inferType == JFloat
 assert "".inferType == JNull
 assert "a".inferType == JString
+assert "TRUE".inferType == JBool
 
 assert @["1.0","2"," 3 "].inferType == JInt # NB
 assert @[" 1.0","1.1"," "].inferType == JFloat
