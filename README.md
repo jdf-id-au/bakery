@@ -21,3 +21,7 @@ Use modern web APIs from nim.
 
 ### Provide export
 Reconstruct CSV and present as download.
+
+## Maturity
+
+Pre-alpha. Will eventually separate functionality into dedicated libraries/tools.

@@ -1,12 +1,15 @@
 import std / os
 import mustache
+import bakery/ingredients
 
 const
   templateDir = "../templates"
+  buildDir = "../build"
   tin = staticRead(templateDir / "tin.html")
-  script = staticRead("bakery" / "viewer.js")
+  script = staticRead(buildDir / "viewer.js")
 
 when isMainModule:
+  shop(commandLineParams())
   let ctx = newContext()
   ctx["title"] = "Proof of concept"
   ctx["script"] = script

@@ -13,11 +13,13 @@ bin           = @["bakery"]
 requires "nim >= 1.6.0"
 requires "mustache >= 0.4.3"
 
-task bake, "Compile viewer and roll html.":
-  #exec("nimble -d:release js src/bakery/viewer")
-  exec("nimble js src/bakery/viewer")
 
-task go, "Build and display.":
-  exec("nimble bake")
-  exec("nimble run")
-  exec("open output/out.html")
+# Tasks
+
+task viewer, "Compile viewer.":
+  #exec("nimble -d:release -o:build/viewer.js js src/bakery/viewer")
+  exec("nimble -o:build/viewer.js js src/bakery/viewer")
+
+# Default `nimble test` runs `tests/t*.nim`.
+# Alternative is `testament pattern "tests/*.nim"`.
+# Note `tests/nim.cfg` to set path.
