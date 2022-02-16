@@ -9,9 +9,11 @@ const
   script = staticRead(buildDir / "viewer.js")
 
 when isMainModule:
-  shop(commandLineParams())
-  let ctx = newContext()
+  let
+    data = shop(commandLineParams())
+    ctx = newContext()
   ctx["title"] = "Proof of concept"
   ctx["script"] = script
+  ctx["data"] = $data
   ctx["noscript"] = "Static preview. Please download and view in a web browser for full interactivity."
   writeFile("output" / "out.html", render(tin, ctx))
