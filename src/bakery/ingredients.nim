@@ -1,4 +1,4 @@
-import std/[parsecsv,json]
+import std/[streams,parsecsv,json]
 import std/[strutils,sequtils,sugar,sets,math]
 
 type
@@ -92,7 +92,18 @@ proc shop*(paths: seq[string]): Shopping =
     nodes: seq[JsonNode] # will eventually be array of arrays
     
   for p in paths:
-    cp.open(p)
+    var
+      fs = openFileStream(p)
+      loaded: string
+    while not fs.atEnd:
+      let c = fs.readChar
+      if c != '\0':
+        loaded.add(c)
+      else:
+        echo "Mid-file NULL in ", p # Thanks Cerner
+    fs.close
+    var ss = loaded.newStringStream
+    cp.open(ss, p)
     cp.readHeaderRow
     if headers.len == 0:
       headers = cp.headers
