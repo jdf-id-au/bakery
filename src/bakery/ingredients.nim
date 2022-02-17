@@ -1,5 +1,7 @@
-import std/[streams, parsecsv, json, logging]
-import std/[strutils, sequtils, sugar, sets, math]
+## Coerce CSV data into JSON array of arrays of more-or-less typed values, with support for column accessors.
+
+import std / [streams, parsecsv, json, logging]
+import std / [strutils, sequtils, sugar, sets, math]
 
 type
   Row = seq[string]
@@ -124,3 +126,9 @@ proc shop*(paths: seq[string]): Shopping =
     nodes.add(%row)
   result.data = %nodes
   result.headers = headers
+
+proc get*(headers: seq[string], row: JsonNode, col: string): JsonNode =
+  assert row.kind == JArray
+  let i = headers.find(col)
+  assert i != -1
+  return row.getElems[i]

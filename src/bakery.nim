@@ -22,6 +22,6 @@ when isMainModule:
   ctx["accessors"] = shopping.headers.accessors
   ctx["data"] = $shopping.data
   ctx["noscript"] = "Static preview. Please download and view in a web browser for full interactivity."
+  ctx["static"] = shopping.bake
   ctx["script"] = script
   writeFile("output" / "out.html", render(tin, ctx))
-  echo shopping.bake

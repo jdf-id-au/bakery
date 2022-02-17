@@ -4,27 +4,28 @@ import std / [json, options]
 import karax / [karaxdsl, vdom]
 import .. / bakery / ingredients
 
-proc get(headers: seq[string], row: JsonNode, col: string): JsonNode =
-  let i = headers.find(col)
-  return row.getElems[i]
-
-proc bake*(sh: Shopping): string =
-  let rows = sh.data.getElems
-
-  proc TEMPERATURE_INITIAL(r: JsonNode): Option[float] =
+proc anaes_temp(sh: Shopping): seq[tuple[anaes: Option[int], temp: Option[float]]] =
+  proc ANAESTHETIST(row: JsonNode): Option[int] =
+    let e = sh.headers.get(row, "ANAESTHETIST")
+    if e.kind == JNull:
+      return none(int)
+    else:
+      return some(e.getInt)
+      
+  proc TEMPERATURE_INITIAL(row: JsonNode): Option[float] =
     ## Scope for eventual macroification...
-    let e = sh.headers.get(r, "TEMPERATURE_INITIAL")
+    let e = sh.headers.get(row, "TEMPERATURE_INITIAL")
     if e.kind == JNull:
       return none(float)
     else:
       return some(e.getFloat)
-      
+
+  for r in sh.data.getElems:
+    result.add((r.ANAESTHETIST, r.TEMPERATURE_INITIAL))
+
+proc bake*(sh: Shopping): string =     
   let vnode = buildHtml(tdiv()):
-    svg:
-      for r in rows:
-        let p = r.TEMPERATURE_INITIAL
-        if p.isSome:
-          circle(cx= $p.get, cy="5", r="10")
-        else:
-          rect(x= $0, y= $0, width= $10, height= $10)
+    ul:
+      for (a,t) in sh.anaes_temp:
+        li: text $a & $t
   result = $vnode
