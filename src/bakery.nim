@@ -1,6 +1,7 @@
-import std/[os,strformat]
+import std / [os, strformat]
 import mustache
-import bakery/ingredients
+import bakery / ingredients
+import examples / oven
 
 proc accessors(headers: seq[string]): string =
   for i, h in headers.pairs:
@@ -23,3 +24,4 @@ when isMainModule:
   ctx["noscript"] = "Static preview. Please download and view in a web browser for full interactivity."
   ctx["script"] = script
   writeFile("output" / "out.html", render(tin, ctx))
+  echo shopping.bake

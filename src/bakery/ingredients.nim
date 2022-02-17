@@ -1,17 +1,20 @@
-import std/[streams,parsecsv,json]
-import std/[strutils,sequtils,sugar,sets,math]
+import std/[streams, parsecsv, json, logging]
+import std/[strutils, sequtils, sugar, sets, math]
 
 type
   Row = seq[string]
-  Shopping = object
+  Shopping* = object
     data*: JsonNode
-    headers*: seq[string]
+    headers*: Row
 
 const
   MAX_SAFE_INTEGER* = 2^53 - 1 # javascript, avoiding BigInt
   TRUE = "TRUE"
   FALSE = "FALSE"
-    
+
+var logger = newConsoleLogger()
+addHandler(logger)
+
 proc inferType*(val: string): JsonNodeKind =
   var s = val.strip
   if s == "":
@@ -29,8 +32,7 @@ proc inferType*(val: string): JsonNodeKind =
         raise newException(RangeDefect, "Integer out of range: " & s)
     if f.int.float == f:
       return JInt
-    else:
-      return JFloat
+    return JFloat
   except ValueError:
     case s:
       of TRUE, FALSE:
@@ -100,7 +102,7 @@ proc shop*(paths: seq[string]): Shopping =
       if c != '\0':
         loaded.add(c)
       else:
-        echo "Mid-file NULL in ", p # Thanks Cerner
+        debug "NUL at byte ", fs.getPosition, " in ", p # Thanks Cerner
     fs.close
     var ss = loaded.newStringStream
     cp.open(ss, p)
@@ -110,8 +112,6 @@ proc shop*(paths: seq[string]): Shopping =
     else:
       doAssert(headers == cp.headers, "Inconsistent headers.")
     while cp.readRow:
-      # FIXME parser can't cope with NUL between quotes. Need to pre-ingest file and fix.
-      #echo cp.row
       vals.add(cp.row)
     cp.close
     
