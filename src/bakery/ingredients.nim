@@ -110,6 +110,7 @@ proc shop*(paths: seq[string]): Shopping =
     cp.open(ss, p)
     cp.readHeaderRow
     if headers.len == 0:
+      doAssert(headers.toHashSet.len == headers.len, "Repeated column names not supported.")
       headers = cp.headers
     else:
       doAssert(headers == cp.headers, "Inconsistent headers.")
@@ -127,8 +128,9 @@ proc shop*(paths: seq[string]): Shopping =
   result.data = %nodes
   result.headers = headers
 
-proc get*(headers: seq[string], row: JsonNode, col: string): JsonNode =
+proc get*(headers: Row, row: JsonNode, col: string): JsonNode =
   assert row.kind == JArray
   let i = headers.find(col)
   assert i != -1
   return row.getElems[i]
+    
