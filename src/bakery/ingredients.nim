@@ -128,13 +128,6 @@ proc shop*(paths: seq[string]): Shopping =
 
   return Shopping(data: %nodes, headers: headers)
   
-# proc get*(sh: Shopping, row: JsonNode, col: string): JsonNode =
-#   ## TODO ideally this would return an Option[T] of the contained type. Need to learn bit more about generics/typedesc.
-#   assert row.kind == JArray
-#   let i = sh.headers.find(col)
-#   assert i != -1
-#   return row.getElems[i]
-
 proc get*[T](sh: Shopping, row: JsonNode, col: string): Option[T] =
   assert row.kind == JArray
   let i = sh.headers.find(col)

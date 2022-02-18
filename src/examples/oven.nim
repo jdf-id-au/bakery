@@ -2,29 +2,12 @@
 
 import std / [json, options, tables]
 import karax / [karaxdsl, vdom]
-import .. / bakery / ingredients
+import .. / bakery / [ingredients, mixer]
 
-type
-  OPair[X, Y] = tuple
-    x: Option[X]
-    y: Option[Y]
-  Grouped[K, V] = OrderedTable[Option[K], seq[Option[V]]]
-
-proc anaes_temp(sh: Shopping): seq[OPair[int, float]] =
-  for r in sh.data.getElems:
-    result.add((get[int](sh, r, "ANAESTHETIST"), get[float](sh, r, "TEMPERATURE_INITIAL")))
-
-proc grouped[K,V](data: seq[OPair[K,V]]): Grouped[K,V] =
-  ## Keys in order of first insertion for the moment.
-  for (k, v) in data:
-    if result.hasKey(k):
-      result[k].add(v)
-    else:
-      result[k] = @[v]
-      
 proc bake*(sh: Shopping): string =
+  let ps = points[int, float](sh, "ANAESTHETIST", "TEMPERATURE_INITIAL")
   let vnode = buildHtml(tdiv()):
     ul:
-      for (a,t) in sh.anaes_temp.grouped.pairs:
+      for (a,t) in ps.grouped.pairs:
         li: text $a & $t
   result = $vnode
