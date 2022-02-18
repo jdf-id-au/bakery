@@ -1,7 +1,7 @@
 ## Coerce CSV data into JSON array of arrays of more-or-less typed values, with support for column accessors.
 
 import std / [streams, parsecsv, json, logging]
-import std / [strutils, sequtils, sugar, sets, math]
+import std / [strutils, sequtils, options, sugar, sets, math]
 
 type
   Row = seq[string]
@@ -128,9 +128,23 @@ proc shop*(paths: seq[string]): Shopping =
 
   return Shopping(data: %nodes, headers: headers)
   
-proc get*(sh: Shopping, row: JsonNode, col: string): JsonNode =
-  ## TODO ideally this would return an Option[T] of the contained type. Need to learn bit more about generics/typedesc.
-  assert row.kind == JArray
-  let i = sh.headers.find(col)
-  assert i != -1
-  return row.getElems[i]
+# proc get*(sh: Shopping, row: JsonNode, col: string): JsonNode =
+#   ## TODO ideally this would return an Option[T] of the contained type. Need to learn bit more about generics/typedesc.
+#   assert row.kind == JArray
+#   let i = sh.headers.find(col)
+#   assert i != -1
+#   return row.getElems[i]
+
+proc get*[T](sh: Shopping, row: JsonNode, col: string): Option[T] =
+  let e = sh.get(row, col)
+  if e.kind == JNull:
+    return none(T)
+  elif e.kind == JBool and T == bool:
+    return some(e.getBool)
+  elif e.kind == JInt and T == int:
+    return some(e.getInt)
+  elif e.kind == JFloat and T == float:
+    return some(e.getFloat)
+  elif e.kind == JString and T == string:
+    return some(e.getString)
+  raise newException(ValueError, "Unsupported node kind: " & $e.kind & " with " & $T)

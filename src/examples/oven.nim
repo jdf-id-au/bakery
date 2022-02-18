@@ -27,7 +27,7 @@ proc anaes_temp(sh: Shopping): seq[OPair[int, float]] =
       return some(e.getFloat)
       
   for r in sh.data.getElems:
-    result.add((r.ANAESTHETIST, r.TEMPERATURE_INITIAL))
+    result.add((sh.get(r, "ANAESTHETIST"), sh.get(r, "TEMPERATURE_INITIAL")))
 
 proc grouped[K,V](data: seq[OPair[K,V]]): Grouped[K,V] =
   ## Keys in order of first insertion for the moment.
