@@ -136,15 +136,22 @@ proc shop*(paths: seq[string]): Shopping =
 #   return row.getElems[i]
 
 proc get*[T](sh: Shopping, row: JsonNode, col: string): Option[T] =
-  let e = sh.get(row, col)
+  assert row.kind == JArray
+  let i = sh.headers.find(col)
+  assert i != -1
+  let e = row.getElems[i]
   if e.kind == JNull:
     return none(T)
-  elif e.kind == JBool and T == bool:
-    return some(e.getBool)
-  elif e.kind == JInt and T == int:
-    return some(e.getInt)
-  elif e.kind == JFloat and T == float:
-    return some(e.getFloat)
-  elif e.kind == JString and T == string:
-    return some(e.getString)
+  when T is bool:
+    if e.kind == JBool:
+      return some(e.getBool)
+  when T is int:
+    if e.kind == JInt:
+      return some(e.getInt)
+  when T is float:
+    if e.kind == JFloat:
+      return some(e.getFloat)
+  when T is string:        
+    if e.kind == JString:
+      return some(e.getString)
   raise newException(ValueError, "Unsupported node kind: " & $e.kind & " with " & $T)
