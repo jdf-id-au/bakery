@@ -5,7 +5,7 @@ import std / [strutils, sequtils, sugar, sets, math]
 
 type
   Row = seq[string]
-  Shopping* = object
+  Shopping* = ref object
     data*: JsonNode
     headers*: Row
 
@@ -125,12 +125,12 @@ proc shop*(paths: seq[string]): Shopping =
     for i, t in types.pairs:
       row.add(t%r[i])
     nodes.add(%row)
-  result.data = %nodes
-  result.headers = headers
 
-proc get*(headers: Row, row: JsonNode, col: string): JsonNode =
+  return Shopping(data: %nodes, headers: headers)
+  
+proc get*(sh: Shopping, row: JsonNode, col: string): JsonNode =
+  ## TODO ideally this would return an Option[T] of the contained type. Need to learn bit more about generics/typedesc.
   assert row.kind == JArray
-  let i = headers.find(col)
+  let i = sh.headers.find(col)
   assert i != -1
   return row.getElems[i]
-    

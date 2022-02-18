@@ -13,14 +13,14 @@ type
 proc anaes_temp(sh: Shopping): seq[OPair[int, float]] =
   proc ANAESTHETIST(row: JsonNode): Option[int] =
     ## TODO template/closure/something
-    let e = sh.headers.get(row, "ANAESTHETIST")
+    let e = sh.get(row, "ANAESTHETIST")
     if e.kind == JNull:
       return none(int)
     else:
       return some(e.getInt)
       
   proc TEMPERATURE_INITIAL(row: JsonNode): Option[float] =
-    let e = sh.headers.get(row, "TEMPERATURE_INITIAL")
+    let e = sh.get(row, "TEMPERATURE_INITIAL")
     if e.kind == JNull:
       return none(float)
     else:
