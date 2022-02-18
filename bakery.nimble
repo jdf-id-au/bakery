@@ -13,6 +13,7 @@ bin           = @["bakery"]
 requires "nim >= 1.6.0"
 requires "mustache >= 0.4.3"
 requires "karax >= 1.2.1"
+requires "chroma >= 0.2.5"
 
 # Tasks
 
