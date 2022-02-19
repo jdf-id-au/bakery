@@ -1,6 +1,7 @@
 ## Render static visualisation, to be picked up by DOM manipulation when js available.
 
-import std / [json, options, tables, strformat]
+import std / [json, options, tables, strformat, sequtils]
+import itertools
 import karax / [karaxdsl, vdom]
 import .. / bakery / [ingredients, mixer]
 
@@ -25,11 +26,11 @@ proc bake*(sh: Shopping): string =
     m = (t: 30, r: 150, b: 0, l: 20) # margin
     s = (w: d.w + m.l + m.r, h: d.h + m.t + m.b) # svg
     
-    ps = points[int, float](sh, "ANAESTHETIST", "TEMPERATURE_INITIAL")
+    ps = points[int, float](sh, "ANAESTHETIST", "TEMPERATURE_INITIAL").toSeq
     dataCount = ps.len
     
   var groupedPoints = ps.group
-  groupedPoints.sort(meanVal) # sort in place!
+#  groupedPoints.sort(meanVal) # sort in place!
 
   var
     colOffset: int
@@ -42,7 +43,7 @@ proc bake*(sh: Shopping): string =
       valueCount = vals.somelen
       missingProp = 1.0 - valueCount.float/entryCount.float
 
-    for (layer, lvals) in vals.getsome.group(binTemp).pairs:
+    for (layer, lvals) in vals.someitems.groupBy(binTemp).pairs:
       let
         layerEntryCount = lvals.len
         x = colOffset.float/dataCount.float
