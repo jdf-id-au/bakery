@@ -1,36 +1,39 @@
 ## Render static visualisation, to be picked up by DOM manipulation when js available.
 
-import std / [json, options, tables, strformat, sequtils]
-import itertools
+import std / [json, options, tables, strformat, sequtils, sugar]
 import karax / [karaxdsl, vdom]
-import .. / bakery / [ingredients, mixer]
+import .. / bakery / [ingredients, mixer, measure]
 
 type
   Mark[C,L] = object
     x, y, w, h: float
     c: C
-    l: L # TODO add raw data
+    l: L
 
-proc binTemp(t: float): float =
-  result = int(t/0.5).float*0.5
-  if result < 34.5:
-    result = 34.5
-  elif result > 38.5:
-    result = 38.5
-
-#proc scaleTemp(t: float): 
+const
+  tempColours = ["#4575b4" "#74add1" "#abd9e9" "#e0f3f8" "#ffffbf" "#fee090" "#fdae61" "#f46d43" "#d73027"]
+  
+  tempRepr = initScale(Threshold,
+                       steps(34.5, 0.5, tempColours.len.dec)
+                       tempSteps,
+                       tempColours)
+   
+  painColours = ["#006837" "#1a9850" "#66bd63" "#a6d96a" "#d9ef8b" "#ffffbf" "#fee08b" "#fdae61" "#f46d43" "#d73027" "#a50026"]
+  painScore = steps(0, 1, 11)
+  painBins = initScale(Threshold, steps(0.5, 1.0, 10), painScore)
+  painRepr = initScale(Ordinal, painBins, painColours)
     
 proc bake*(sh: Shopping): string =
-  let
+  const
     d = (w: 1000, h: 500) # dimension
     m = (t: 30, r: 150, b: 0, l: 20) # margin
     s = (w: d.w + m.l + m.r, h: d.h + m.t + m.b) # svg
-    
+  let
     ps = points[int, float](sh, "ANAESTHETIST", "TEMPERATURE_INITIAL").toSeq
     dataCount = ps.len
     
-  var groupedPoints = ps.group
-#  groupedPoints.sort(meanVal) # sort in place!
+  var groupedPoints = ps.groupByKey
+  groupedPoints.sort(someMeanVal) # sort in place!
 
   var
     colOffset: int

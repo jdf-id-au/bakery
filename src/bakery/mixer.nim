@@ -1,5 +1,4 @@
 import std / [options, tables, sugar, stats, sequtils]
-import itertools
 import ingredients
 
 type
@@ -22,11 +21,9 @@ proc somelen*[T](a: openArray[Option[T]]): int =
     if v.isSome:
       result.inc
 
-template groupBy*[T, U](s: iterable[T], f: proc(a: T): U): Grouped[T, U] =
-  # TODO could this return an iterable??
-  # TODO submit to itertools if it works??
+template groupBy*[V, G](s: iterable[V], f: proc(a: V): G): Grouped[G, V] =
   # https://nim-lang.org/docs/manual.html#overload-resolution-iterable
-  var ret: Grouped[T, U]
+  var ret: Grouped[G, V]
   for v in s:
     let g = f(v)
     if ret.hasKey(g):
@@ -34,20 +31,24 @@ template groupBy*[T, U](s: iterable[T], f: proc(a: T): U): Grouped[T, U] =
     else:
       ret[g] = @[v]
   ret
-      
-proc group*[K, V](a: openArray[Pair[K, V]]): Grouped[K, V] =
+
+# Can't get these working for ps.groupBy(key) -- confusing type mismatch for `sort` proc
+# proc groupBy*[V, G](s: seq[V], f: proc(a: V): G): Grouped[G, V] =
+#   return groupBy(s.items, f)
+# proc key*[K, V](p: Pair[K, V]): K =
+#   p.x
+
+proc groupByKey*[K, V](a: openArray[Pair[K, V]]): Grouped[K, V] =
   for (k, v) in a:
     if result.hasKey(k):
       result[k].add(v)
     else:
       result[k] = @[v]
 
-# proc meanVal*(a, b: (Option[int], openArray[Option[float]])): int =
-#   cmp(a[1].someitems.toSeq.mean, b[1].someitems.toSeq.mean)
-    
-proc meanVal*[K, V](a, b: (Option[K], openArray[Option[V]])): int =
+# background https://nullbuffer.com/articles/welford_algorithm.html
+proc someMeanVal*[K, V](a, b: (Option[K], seq[Option[V]])): int = # needs to be seq, not openArray; learn why...
   ## For use with Grouped.sort (which comes from OrderedTable.sort)
   cmp(a[1].someitems.toSeq.mean, b[1].someitems.toSeq.mean)
 
-# proc meanVal*[K, V](a, b: (K, openArray[V])): int =
-#   cmp(a[1].mean, b[1].mean)
+proc meanVal*[K, V](a, b: (K, seq[V])): int =
+  cmp(a[1].mean, b[1].mean)
