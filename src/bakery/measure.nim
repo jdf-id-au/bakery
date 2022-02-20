@@ -38,6 +38,10 @@ func thresholdScale*[D, R](d: (int) -> D, r: seq[R]): ThresholdScale[D, R] =
   result.domain = collect(for i in 0..r.len: d(i))
   result.range = r
 
+func thresholdScale*[R](r: seq[R]): ThresholdScale[R, R] =
+  result.domain = r[0..^2]
+  result.range = r
+  
 func bounds*[T](lower, upper: T): Bounds[T] =
   result.lower = some(lower)
   result.upper = some(upper)
@@ -109,20 +113,15 @@ proc steps*[T](low, step: T; n: int): seq[T] =
   collect(for i in 0..<n: fn(i))
     
 func bin*[D, R](s: ThresholdScale[D, R], v: D): R =
-  ## Call math.round instead for simple float->int conversion.
+  ## Bin using <=
   for i, lim in s.domain:
-    if i == s.range.len:
-      return s.range[^1]
-    when D is int:
-      if v <= lim:
-        return s.range[i]
-    else:
-      if v < lim:
-        return s.range[i]
+    if v <= lim:
+      return s.range[i]
+  return s.range[^1]
 
 func bin*[D, R](s: OrdinalScale[D, R], v: D): R {.raises: [KeyError].} =
-  s[v]
-
+  return s[v]
+  
 proc scale*[D, R](s: LinearScale[D, R], x: D): R =
   ## Does not enforce bounds.
   result = R(s.m * x.float) + s.b

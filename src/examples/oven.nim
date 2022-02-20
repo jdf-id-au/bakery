@@ -11,7 +11,7 @@ type
     l: L
 
 const
-  tempBins = thresholdScale(steps(34.5, 0.5), steps(34.5, 0.5, 9))
+  tempBins = thresholdScale(steps(34.5, 0.5, 9))
   tempRepr = ordinalScale(tempBins,
     ["#4575b4", "#74add1", "#abd9e9", "#e0f3f8", "#ffffbf",
      "#fee090", "#fdae61", "#f46d43", "#d73027"].toSeq)
@@ -21,7 +21,7 @@ const
      "#ffffbf", "#fee08b", "#fdae61", "#f46d43", "#d73027",
      "#a50026"].toSeq)
     
-func bake*(sh: Shopping): string =
+proc bake*(sh: Shopping): string =
   const
     d = (w: 1000, h: 500) # dimension
     m = (t: 30, r: 150, b: 0, l: 20) # margin
@@ -61,6 +61,8 @@ func bake*(sh: Shopping): string =
         yy = y + mh2 # ...and add to y offset so box is vertically centred.
         hh = h - missingHeight # reduce height correspondingly
       marks.add(Mark[Option[int], float](x: x, y: 1.0-(yy+hh), w: w, h: h, c: col, l: layer))
+
+    colOffset += entryCount
   
   let vnode = buildHtml(svg(width="100%", viewBox=fmt"{-m.l} {-m.t} {s.w} {s.h}")):
     g:
