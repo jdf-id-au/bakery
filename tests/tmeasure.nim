@@ -14,7 +14,8 @@ doAssertRaises(AssertionDefect):
              
 doAssert intTS.bin(7) == 4
 doAssert floatTS.bin(1.5) == 2
-doAssert ifLS.scale(15) == 30.0
+doAssert ifLS.scale(15) ~= 30.0
 doAssert fiLS.scale(30.0) == 15
 doAssert invLS.scale(4) == 96
-doAssert flipLS.scale(3.0) == 8.0
+doAssert flipLS.scale(3.0) ~= 8.0
+doAssert ifLS.clampScale(30) ~= 55.0

@@ -11,10 +11,12 @@ type
     range: seq[R]
   Bounds[T] = tuple
     lower, upper: Option[T]
-  LinearScale[T] = tuple
+  LinearScale[D, R] = object
+    domain: Bounds[D]
+    range: Bounds[R]
     # y = mx + b
     m: float
-    b: T
+    b: R
 
 # NB diverging from `initOrdinalScale` naming convention, may regret this.
     
@@ -45,11 +47,19 @@ func lowerBound*[T](v: T): Bounds[T] =
 func upperBound*[T](v: T): Bounds[T] =
   result.upper = some(v)
   
-func linearScale*[D, R](d: Bounds[D], r: Bounds[R]): LinearScale[R] =
+func linearScale*[D, R](d: Bounds[D], r: Bounds[R]): LinearScale[D, R] =
   ## Calculate scale and offset according to supplied "bounds" (really reference points).
   ## If one lower and one upper bound is defined, flip using lower + delta -> upper - delta.
   let invalidRange = newException(RangeDefect, "Invalid range combination: " & $d & ", " & $r)
+  
+  if d.lower.isSome and d.upper.isSome:
+    doAssert d.lower.get < d.upper.get, "Lower domain bound must be less than upper."
 
+  # Needed for clamping.
+  result.domain = d
+  result.range = r
+
+  # Calculate m and b now rather than on each `scale` call.
   var m: float
   if d.lower.isSome:
      if d.upper.isSome: # may flip if r bounds in reverse order
@@ -109,7 +119,18 @@ func bin*[D, R](s: ThresholdScale[D, R], v: D): R =
 func bin*[D, R](s: OrdinalScale[D, R], v: D): R {.raises: [KeyError].} =
   s[v]
 
-proc scale*[D, R](s: LinearScale[R], x: D): R =
+proc scale*[D, R](s: LinearScale[D, R], x: D): R =
   ## Does not enforce bounds.
   result = R(s.m * x.float) + s.b
-  echo fmt"{s} {x} -> {result}"
+  #echo fmt"{s} {x} -> {result}"
+
+proc clampScale*[D, R](s: LinearScale[D, R], x: D): R =
+  let
+    l = s.domain.lower
+    u = s.domain.upper
+  if l.isSome and x < l.get:
+    s.scale(l.get)
+  elif u.isSome and x > u.get:
+    s.scale(u.get)
+  else:
+    s.scale(x)
