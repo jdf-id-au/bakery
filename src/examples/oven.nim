@@ -18,7 +18,7 @@ const
 proc bake*(sh: Shopping): string =
   const
     d = (w: 1000, h: 500) # dimension
-    m = (t: 30, r: 150, b: 0, l: 20) # margin
+    m = (t: 30, r: 150, b: 20, l: 20) # margin
     s = (w: d.w + m.l + m.r,
          h: d.h + m.t + m.b) # svg
     X = linearScale(bounds(0.0, 1.0), bounds(0.float, d.w.float))
@@ -28,5 +28,6 @@ proc bake*(sh: Shopping): string =
 
   let vnode = buildHtml(svg(width="100%", viewBox=fmt"{-m.l} {-m.t} {s.w} {s.h}")):
     layerPlot(ps, someValsMean, (t) => tempBins.bin(t), X, Y, tempRepr)
+    labelLayerPlot(m, X, Y, tempRepr, tempRepr)
   
   result = $vnode

@@ -19,6 +19,8 @@ type
     # y = mx + b
     m: float
     b: R
+  Margin* = tuple
+    t, r, b, l: int
 
 # NB diverging from `initOrdinalScale` naming convention, may regret this.
     
