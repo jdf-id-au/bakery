@@ -9,6 +9,7 @@ type
     x, y, w, h: float
     c: C
     l: L
+    n: int
 
 const
   tempBins = thresholdScale(steps(34.5, 0.5, 9))
@@ -25,7 +26,8 @@ proc bake*(sh: Shopping): string =
   const
     d = (w: 1000, h: 500) # dimension
     m = (t: 30, r: 150, b: 0, l: 20) # margin
-    s = (w: d.w + m.l + m.r, h: d.h + m.t + m.b) # svg
+    s = (w: d.w + m.l + m.r,
+         h: d.h + m.t + m.b) # svg
     X = linearScale(bounds(0.0, 1.0), bounds(0.float, d.w.float))
     Y = linearScale(bounds(0.0, 1.0), bounds(0.float, d.h.float))
   let
@@ -60,15 +62,18 @@ proc bake*(sh: Shopping): string =
         mh2 = missingHeight/2.0 # ...halve it,
         yy = y + mh2 # ...and add to y offset so box is vertically centred.
         hh = h - missingHeight # reduce height correspondingly
-      marks.add(Mark[Option[int], float](x: x, y: 1.0-(yy+hh), w: w, h: h, c: col, l: layer))
+      marks.add(Mark[Option[int], float](x: x, y: 1.0-(yy+hh), w: w, h: hh, c: col, l: layer, n: layerEntryCount))
       layerOffset += layerEntryCount
     colOffset += entryCount
-  
-  let vnode = buildHtml(svg(width="100%", viewBox=fmt"{-m.l} {-m.t} {s.w} {s.h}")):
+
+  proc f(v:float): string =
+    fmt"{v:.1f}"
+    
+  let vnode = buildHtml(svg(width="100%", viewBox=fmt"{-m.l} {-m.t} {s.w} {s.h+500}")):
     g:
       for m in marks:
-        rect(x = $X.scale(m.x), y = $Y.scale(m.y),
-             width = $X.scale(m.w), height = $Y.scale(m.h),
+        rect(x = X.scale(m.x).f, y = Y.scale(m.y).f,
+             width = X.scale(m.w).f, height = Y.scale(m.h).f,
              fill = $tempRepr.bin(m.l))
           
   result = $vnode
