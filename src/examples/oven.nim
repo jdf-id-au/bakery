@@ -32,8 +32,8 @@ proc bake*(sh: Shopping): string =
     ps = points[int, float](sh, "ANAESTHETIST", "TEMPERATURE_INITIAL").toSeq
     dataCount = ps.len
     
-  var groupedPoints = ps.groupByKey
-  groupedPoints.sort(someMeanVal) # sort in place!
+  var groupedPoints = ps.groupValsByKey
+  groupedPoints.sort(someValsMean) # sort in place!
 
   var
     colOffset: int
@@ -46,10 +46,7 @@ proc bake*(sh: Shopping): string =
       valueCount = vals.somelen
       missingProp = 1.0 - valueCount.float/entryCount.float
     
-    proc binTemp(t: float): float =
-      tempBins.bin(t)
-
-    var binned = vals.someitems.groupBy(binTemp)
+    var binned = vals.groupSomeBy((t) => tempBins.bin(t))
     binned.sort(cmpKey) # sorts in place and returns nothing! I keep forgetting!
     
     for (layer, lvals) in binned.pairs:
