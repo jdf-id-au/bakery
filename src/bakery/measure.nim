@@ -1,3 +1,5 @@
+## Scale and bin (pale imitation of d3js).
+
 import std / [sequtils, tables, options, sugar, math, strformat, logging]
 
 # Can imagine needing to refactor completely once requirements expand.
@@ -21,7 +23,6 @@ type
 # NB diverging from `initOrdinalScale` naming convention, may regret this.
     
 func ordinalScale*[D, R](d: seq[D], r: seq[R]): OrdinalScale[D, R] =
-  # TODO just use OrderedTable underneath?
   doAssert d.len == r.len
   zip(d, r).toOrderedTable
   
@@ -69,6 +70,8 @@ func linearScale*[D, R](d: Bounds[D], r: Bounds[R]): LinearScale[D, R] =
          m = (r.upper.get - r.lower.get).float / (d.upper.get - d.lower.get).float
      elif r.upper.isSome: # flip
        m = -1.0
+     else:
+       m = 1.0
   elif d.upper.isSome and r.lower.isSome: # flip
     m = -1.0
   else:
@@ -108,13 +111,14 @@ proc steps*[T](low, step: T; n: int): seq[T] =
 func bin*[D, R](s: ThresholdScale[D, R], v: D): R =
   ## Call math.round instead for simple float->int conversion.
   for i, lim in s.domain:
+    if i == s.range.len:
+      return s.range[^1]
     when D is int:
       if v <= lim:
         return s.range[i]
     else:
       if v < lim:
         return s.range[i]
-  return s.range[^1]
 
 func bin*[D, R](s: OrdinalScale[D, R], v: D): R {.raises: [KeyError].} =
   s[v]
@@ -122,9 +126,10 @@ func bin*[D, R](s: OrdinalScale[D, R], v: D): R {.raises: [KeyError].} =
 proc scale*[D, R](s: LinearScale[D, R], x: D): R =
   ## Does not enforce bounds.
   result = R(s.m * x.float) + s.b
-  #echo fmt"{s} {x} -> {result}"
+  #echo fmt"{result} = {s.m}·{x} + {s.b}"
 
 proc clampScale*[D, R](s: LinearScale[D, R], x: D): R =
+  ## Enforces bounds.
   let
     l = s.domain.lower
     u = s.domain.upper

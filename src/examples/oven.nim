@@ -11,20 +11,23 @@ type
     l: L
 
 const
-  tempRepr = thresholdScale(steps(34.5, 0.5),
-    ["#4575b4" "#74add1" "#abd9e9" "#e0f3f8" "#ffffbf"
-     "#fee090" "#fdae61" "#f46d43" "#d73027"])
+  tempBins = thresholdScale(steps(34.5, 0.5), steps(34.5, 0.5, 9))
+  tempRepr = ordinalScale(tempBins,
+    ["#4575b4", "#74add1", "#abd9e9", "#e0f3f8", "#ffffbf",
+     "#fee090", "#fdae61", "#f46d43", "#d73027"].toSeq)
   painBins = thresholdScale(steps(0.5, 1.0), steps(0, 1, 11))
   painRepr = ordinalScale(painBins,
-    ["#006837" "#1a9850" "#66bd63" "#a6d96a" "#d9ef8b"
-     "#ffffbf" "#fee08b" "#fdae61" "#f46d43" "#d73027"
-     "#a50026"])
+    ["#006837", "#1a9850", "#66bd63", "#a6d96a", "#d9ef8b",
+     "#ffffbf", "#fee08b", "#fdae61", "#f46d43", "#d73027",
+     "#a50026"].toSeq)
     
 func bake*(sh: Shopping): string =
   const
     d = (w: 1000, h: 500) # dimension
     m = (t: 30, r: 150, b: 0, l: 20) # margin
     s = (w: d.w + m.l + m.r, h: d.h + m.t + m.b) # svg
+    X = linearScale(bounds(0.0, 1.0), bounds(0, d.w))
+    Y = linearScale(bounds(0.0, 1.0), bounds(0, d.h))
   let
     ps = points[int, float](sh, "ANAESTHETIST", "TEMPERATURE_INITIAL").toSeq
     dataCount = ps.len
@@ -42,7 +45,10 @@ func bake*(sh: Shopping): string =
       entryCount = vals.len
       valueCount = vals.somelen
       missingProp = 1.0 - valueCount.float/entryCount.float
-
+    
+    proc binTemp(t: float): float =
+      tempBins.bin(t)
+      
     for (layer, lvals) in vals.someitems.groupBy(binTemp).pairs:
       let
         layerEntryCount = lvals.len
@@ -59,6 +65,8 @@ func bake*(sh: Shopping): string =
   let vnode = buildHtml(svg(width="100%", viewBox=fmt"{-m.l} {-m.t} {s.w} {s.h}")):
     g:
       for m in marks:
-        rect(x = $m.x, y = $m.y, width = $m.w, height = $m.h)
+        rect(x = $X.scale(m.x), y = $Y.scale(m.y),
+             width = $X.scale(m.w), height = $Y.scale(m.h),
+             fill = $tempRepr.bin(m.l))
           
   result = $vnode

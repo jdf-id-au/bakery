@@ -8,6 +8,8 @@ let
   fiLS = linearScale(bounds(5.0, 55.0), bounds(10, 20))
   invLS = linearScale(bounds(0, 10), bounds(100, 90))
   flipLS = linearScale(lowerBound(1.0), upperBound(10.0))
+  offsLS = linearScale(lowerBound(5), lowerBound(100))
+  uoffsLS = linearScale(upperBound(5), upperBound(100))
                        
 doAssertRaises(AssertionDefect):
   discard thresholdScale(steps(0, 1, 4), steps(0, 1, 4))
@@ -19,3 +21,5 @@ doAssert fiLS.scale(30.0) == 15
 doAssert invLS.scale(4) == 96
 doAssert flipLS.scale(3.0) ~= 8.0
 doAssert ifLS.clampScale(30) ~= 55.0
+doAssert offsLS.scale(10) == 105
+doAssert uoffsLS.scale(10) == 105

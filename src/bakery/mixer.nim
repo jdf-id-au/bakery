@@ -1,3 +1,5 @@
+## Wrangle data, handle missing values.
+
 import std / [options, tables, sugar, stats, sequtils]
 import ingredients
 
