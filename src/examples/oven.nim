@@ -24,14 +24,15 @@ const
 
 # TODO now factor out layerPlot to suit different inputs...
 proc layerPlot*[K, V](ps: seq[Pair[Option[K], Option[V]]],
-                      groupSort: ((Option[K], seq[Option[V]]),
-                                  (Option[K], seq[Option[V]])) -> int,
+                      colSort: ((Option[K], seq[Option[V]]),
+                                (Option[K], seq[Option[V]])) -> int,
+                      layerSort: (V) -> V, # FIXME what about ordinal layers with text?
                       X, Y: LinearScale[float, float],
                       Z: OrdinalScale[float, string]): VNode =
   ## Return an svg `g` node containing whole plot.
   let dataCount = ps.len
   var groupedPoints = ps.groupValsByKey
-  groupedPoints.sort(groupSort)
+  groupedPoints.sort(colSort)
 
   var
     colOffset: int
@@ -44,7 +45,7 @@ proc layerPlot*[K, V](ps: seq[Pair[Option[K], Option[V]]],
       valueCount = vals.somelen
       missingProp = 1.0 - valueCount.float/entryCount.float
 
-    var binned = vals.groupSomeBy((t) => tempBins.bin(t)) # FIXME pass in fn
+    var binned = vals.groupSomeBy(layerSort)
     binned.sort(cmpKey) # unnecessary to pass in?
 
     for (layer, lvals) in binned.pairs:
@@ -83,6 +84,6 @@ proc bake*(sh: Shopping): string =
     ps = points[int, float](sh, "ANAESTHETIST", "TEMPERATURE_INITIAL").toSeq
 
   let vnode = buildHtml(svg(width="100%", viewBox=fmt"{-m.l} {-m.t} {s.w} {s.h}")):
-    layerPlot(ps, someValsMean, X, Y, tempRepr)
+    layerPlot(ps, someValsMean, (t) => tempBins.bin(t), X, Y, tempRepr)
   
   result = $vnode
