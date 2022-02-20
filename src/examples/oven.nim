@@ -2,14 +2,7 @@
 
 import std / [json, options, tables, strformat, sequtils, sugar]
 import karax / [karaxdsl, vdom]
-import .. / bakery / [ingredients, mixer, measure]
-
-type
-  Mark[C,L] = object
-    x, y, w, h: float
-    c: C
-    l: L
-    n: int
+import .. / bakery / [ingredients, mixer, measure, layer]
 
 const
   tempBins = thresholdScale(steps(34.5, 0.5, 9))
@@ -21,56 +14,6 @@ const
     ["#006837", "#1a9850", "#66bd63", "#a6d96a", "#d9ef8b",
      "#ffffbf", "#fee08b", "#fdae61", "#f46d43", "#d73027",
      "#a50026"].toSeq)
-
-# TODO now factor out layerPlot to suit different inputs...
-proc layerPlot*[K, V, B](ps: seq[Pair[Option[K], Option[V]]],
-                         colSort: ((Option[K], seq[Option[V]]),
-                                   (Option[K], seq[Option[V]])) -> int,
-                         bin: (V) -> B,
-                         X, Y: LinearScale[float, float],
-                         Z: OrdinalScale[B, string]): VNode =
-  ## Return an svg `g` node containing whole plot.
-  let dataCount = ps.len
-  var groupedPoints = ps.groupValsByKey
-  groupedPoints.sort(colSort)
-
-  var
-    colOffset: int
-    marks: seq[Mark[Option[K], B]]
-
-  for (col, vals) in groupedPoints.pairs:
-    var layerOffset: int
-    let
-      entryCount = vals.len
-      valueCount = vals.somelen
-      missingProp = 1.0 - valueCount.float/entryCount.float
-
-    var binned = vals.groupSomeBy(bin)
-    binned.sort(cmpKey) # unnecessary to pass in?
-
-    for (layer, lvals) in binned.pairs:
-      let
-        layerEntryCount = lvals.len
-        x = colOffset.float/dataCount.float
-        y = layerOffset.float/valueCount.float # y offset is proportional to known values
-        w = entryCount.float/dataCount.float
-        h = layerEntryCount.float/valueCount.float # height is proportion of known values
-        missingHeight = h * missingProp # Calculate height which should represent missing cases
-        mh2 = missingHeight/2.0 # ...halve it,
-        yy = y + mh2 # ...and add to y offset so box is vertically centred.
-        hh = h - missingHeight # reduce height correspondingly
-      marks.add(Mark[Option[K], B](x: x, y: 1.0-(yy+hh), w: w, h: hh, c: col, l: layer, n: layerEntryCount))
-      layerOffset += layerEntryCount
-    colOffset += entryCount
-
-  proc f(v:float): string =
-    fmt"{v:.1f}"
-        
-  buildHtml(g()):
-    for m in marks:
-      rect(x = X.scale(m.x).f, y = Y.scale(m.y).f,
-           width = X.scale(m.w).f, height = Y.scale(m.h).f,
-           fill = Z.bin(m.l))
   
 proc bake*(sh: Shopping): string =
   const
