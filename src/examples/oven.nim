@@ -23,12 +23,12 @@ const
      "#a50026"].toSeq)
 
 # TODO now factor out layerPlot to suit different inputs...
-proc layerPlot*[K, V](ps: seq[Pair[Option[K], Option[V]]],
-                      colSort: ((Option[K], seq[Option[V]]),
-                                (Option[K], seq[Option[V]])) -> int,
-                      layerSort: (V) -> V, # FIXME what about ordinal layers with text?
-                      X, Y: LinearScale[float, float],
-                      Z: OrdinalScale[float, string]): VNode =
+proc layerPlot*[K, V, B](ps: seq[Pair[Option[K], Option[V]]],
+                         colSort: ((Option[K], seq[Option[V]]),
+                                   (Option[K], seq[Option[V]])) -> int,
+                         bin: (V) -> B,
+                         X, Y: LinearScale[float, float],
+                         Z: OrdinalScale[B, string]): VNode =
   ## Return an svg `g` node containing whole plot.
   let dataCount = ps.len
   var groupedPoints = ps.groupValsByKey
@@ -36,7 +36,7 @@ proc layerPlot*[K, V](ps: seq[Pair[Option[K], Option[V]]],
 
   var
     colOffset: int
-    marks: seq[Mark[Option[K], V]]
+    marks: seq[Mark[Option[K], B]]
 
   for (col, vals) in groupedPoints.pairs:
     var layerOffset: int
@@ -45,7 +45,7 @@ proc layerPlot*[K, V](ps: seq[Pair[Option[K], Option[V]]],
       valueCount = vals.somelen
       missingProp = 1.0 - valueCount.float/entryCount.float
 
-    var binned = vals.groupSomeBy(layerSort)
+    var binned = vals.groupSomeBy(bin)
     binned.sort(cmpKey) # unnecessary to pass in?
 
     for (layer, lvals) in binned.pairs:
@@ -59,7 +59,7 @@ proc layerPlot*[K, V](ps: seq[Pair[Option[K], Option[V]]],
         mh2 = missingHeight/2.0 # ...halve it,
         yy = y + mh2 # ...and add to y offset so box is vertically centred.
         hh = h - missingHeight # reduce height correspondingly
-      marks.add(Mark[Option[K], V](x: x, y: 1.0-(yy+hh), w: w, h: hh, c: col, l: layer, n: layerEntryCount))
+      marks.add(Mark[Option[K], B](x: x, y: 1.0-(yy+hh), w: w, h: hh, c: col, l: layer, n: layerEntryCount))
       layerOffset += layerEntryCount
     colOffset += entryCount
 
