@@ -16,7 +16,7 @@ iterator someitems*[T](a: openArray[Option[T]]): T =
     if v.isSome:
       yield v.get
 
-proc somelen*[T](a: openArray[Option[T]]): int =
+func somelen*[T](a: openArray[Option[T]]): int =
   for v in a:
     if v.isSome:
       result.inc
@@ -38,7 +38,7 @@ template groupBy*[V, G](s: iterable[V], f: proc(a: V): G): Grouped[G, V] =
 # proc key*[K, V](p: Pair[K, V]): K =
 #   p.x
 
-proc groupByKey*[K, V](a: openArray[Pair[K, V]]): Grouped[K, V] =
+func groupByKey*[K, V](a: openArray[Pair[K, V]]): Grouped[K, V] =
   for (k, v) in a:
     if result.hasKey(k):
       result[k].add(v)
@@ -46,9 +46,9 @@ proc groupByKey*[K, V](a: openArray[Pair[K, V]]): Grouped[K, V] =
       result[k] = @[v]
 
 # background https://nullbuffer.com/articles/welford_algorithm.html
-proc someMeanVal*[K, V](a, b: (Option[K], seq[Option[V]])): int = # needs to be seq, not openArray; learn why...
+func someMeanVal*[K, V](a, b: (Option[K], seq[Option[V]])): int = # needs to be seq, not openArray; learn why...
   ## For use with Grouped.sort (which comes from OrderedTable.sort)
   cmp(a[1].someitems.toSeq.mean, b[1].someitems.toSeq.mean)
 
-proc meanVal*[K, V](a, b: (K, seq[V])): int =
+func meanVal*[K, V](a, b: (K, seq[V])): int =
   cmp(a[1].mean, b[1].mean)

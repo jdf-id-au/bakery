@@ -11,19 +11,16 @@ type
     l: L
 
 const
-  tempColours = ["#4575b4" "#74add1" "#abd9e9" "#e0f3f8" "#ffffbf" "#fee090" "#fdae61" "#f46d43" "#d73027"]
-  
-  tempRepr = initScale(Threshold,
-                       steps(34.5, 0.5, tempColours.len.dec)
-                       tempSteps,
-                       tempColours)
-   
-  painColours = ["#006837" "#1a9850" "#66bd63" "#a6d96a" "#d9ef8b" "#ffffbf" "#fee08b" "#fdae61" "#f46d43" "#d73027" "#a50026"]
-  painScore = steps(0, 1, 11)
-  painBins = initScale(Threshold, steps(0.5, 1.0, 10), painScore)
-  painRepr = initScale(Ordinal, painBins, painColours)
+  tempRepr = thresholdScale(steps(34.5, 0.5),
+    ["#4575b4" "#74add1" "#abd9e9" "#e0f3f8" "#ffffbf"
+     "#fee090" "#fdae61" "#f46d43" "#d73027"])
+  painBins = thresholdScale(steps(0.5, 1.0), steps(0, 1, 11))
+  painRepr = ordinalScale(painBins,
+    ["#006837" "#1a9850" "#66bd63" "#a6d96a" "#d9ef8b"
+     "#ffffbf" "#fee08b" "#fdae61" "#f46d43" "#d73027"
+     "#a50026"])
     
-proc bake*(sh: Shopping): string =
+func bake*(sh: Shopping): string =
   const
     d = (w: 1000, h: 500) # dimension
     m = (t: 30, r: 150, b: 0, l: 20) # margin

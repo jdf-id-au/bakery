@@ -17,7 +17,7 @@ const
 var logger = newConsoleLogger()
 addHandler(logger)
 
-proc inferType*(val: string): JsonNodeKind =
+func inferType*(val: string): JsonNodeKind =
   var s = val.strip
   if s == "":
     return JNull
@@ -42,7 +42,7 @@ proc inferType*(val: string): JsonNodeKind =
       else:
         return JString
 
-proc inferType*(vals: seq[string]): JsonNodeKind =
+func inferType*(vals: seq[string]): JsonNodeKind =
   let ts = collect:
     for v in vals:
       {v.inferType}
@@ -59,12 +59,12 @@ proc inferType*(vals: seq[string]): JsonNodeKind =
   else:
     raise newException(ValueError, "Inconsistent types: " & $ts)
 
-proc inferTypes(rows: seq[Row], header: Row): seq[JsonNodeKind] =
+func inferTypes(rows: seq[Row], header: Row): seq[JsonNodeKind] =
   result = newSeq[JsonNodeKind](header.len)
   for i, c in header.pairs: # Header column names actually unused here.
     result[i] = rows.map((r) => r[i]).inferType
 
-proc `%`(k: JsonNodeKind, val: string): JsonNode =
+func `%`(k: JsonNodeKind, val: string): JsonNode =
   ## Convert string to JsonNode. Sanity checking should already have been done by `inferType`.
   let s = val.strip()
   if s == "":
@@ -87,7 +87,7 @@ proc `%`(k: JsonNodeKind, val: string): JsonNode =
     else:
       raise newException(ValueError, "Unsupported node kind: " & $k & " containing: " & s & ".")
 
-proc shop*(paths: seq[string]): Shopping =
+proc shop*(paths: seq[string]): Shopping = # `func` probably wouldn't allow `debug` logging
   ## Shop for ingredients (get data). Reads everything into memory!
   var
     cp: CsvParser
@@ -128,7 +128,7 @@ proc shop*(paths: seq[string]): Shopping =
 
   return Shopping(data: %nodes, headers: headers)
   
-proc get*[T](sh: Shopping, row: JsonNode, col: string): Option[T] =
+func get*[T](sh: Shopping, row: JsonNode, col: string): Option[T] =
   assert row.kind == JArray
   let i = sh.headers.find(col)
   assert i != -1
