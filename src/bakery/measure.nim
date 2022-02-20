@@ -1,4 +1,4 @@
-import std / [sequtils, tables, options, sugar, math]
+import std / [sequtils, tables, options, sugar, math, strformat, logging]
 
 # Can imagine needing to refactor completely once requirements expand.
 # Only implement exactly what's needed at this stage to minimise busywork.
@@ -13,7 +13,8 @@ type
     lower, upper: Option[T]
   LinearScale[T] = tuple
     # y = mx + b
-    m, b: T
+    m: float
+    b: T
 
 # NB diverging from `initOrdinalScale` naming convention, may regret this.
     
@@ -45,18 +46,44 @@ func upperBound*[T](v: T): Bounds[T] =
   result.upper = some(v)
   
 func linearScale*[D, R](d: Bounds[D], r: Bounds[R]): LinearScale[R] =
-  if d.lower.isSome: doAssert r.lower.isSome
-  if d.upper.isSome: doAssert r.upper.isSome
-  result.m = if d.lower.isSome and d.upper.isSome:
-               (r.upper.get - r.lower.get) / (d.upper.get - d.lower.get).R
-             else:
-               1.R
-  result.b = if d.lower.isSome and r.lower.isSome:
-               r.lower.get - d.lower.get.R
-             elif d.upper.isSome and r.upper.isSome:
-               r.upper.get - d.upper.get.R
-             else:
-               0.R
+  ## Calculate scale and offset according to supplied "bounds" (really reference points).
+  ## If one lower and one upper bound is defined, flip using lower + delta -> upper - delta.
+  let invalidRange = newException(RangeDefect, "Invalid range combination: " & $d & ", " & $r)
+  var
+    m: float
+    b: R
+  if d.lower.isSome:
+     if d.upper.isSome: # may flip if r bounds in reverse order
+       if r.lower.isNone and r.upper.isNone:
+         raise invalidRange
+       else:
+         m = (r.upper.get - r.lower.get).float / (d.upper.get - d.lower.get).float
+     elif r.upper.isSome: # flip
+       m = -1.0
+  elif d.upper.isSome and r.lower.isSome: # flip
+    m = -1.0
+  else:
+    m = 1.0
+  result.m = m
+  # proc calcB(r: R, d: D): R =
+  #   R(r.float - d.float * m)
+  if d.lower.isSome:               
+    if r.lower.isSome:
+      b = R(r.lower.get.float - d.lower.get.float * result.m)
+    elif r.upper.isSome: # flip only
+      b = R(r.upper.get.float - d.lower.get.float * result.m)
+    else:
+      raise invalidRange
+  elif d.upper.isSome:
+    if r.upper.isSome:
+      b = R(r.upper.get.float - d.upper.get.float * result.m)
+    elif r.lower.isSome:
+      b = R(r.lower.get.float - d.upper.get.float * result.m)
+    else:
+      raise invalidRange
+  else:
+    b = R(0)
+  result.b = b
                
 func `~=`*[T: SomeFloat](x, y: T): bool =
   almostEqual(x, y)
@@ -83,5 +110,7 @@ func bin*[D, R](s: ThresholdScale[D, R], v: D): R =
 func bin*[D, R](s: OrdinalScale[D, R], v: D): R {.raises: [KeyError].} =
   s[v]
 
-func scale*[D, R](s: LinearScale[R], x: D): R =
-  s.m * x.R + s.b
+proc scale*[D, R](s: LinearScale[R], x: D): R =
+  ## Does not enforce bounds.
+  result = R(s.m * x.float) + s.b
+  echo fmt"{s} {x} -> {result}"
