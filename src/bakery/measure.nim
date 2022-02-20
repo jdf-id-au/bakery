@@ -7,13 +7,13 @@ import std / [sequtils, tables, options, sugar, math, strformat, logging]
 
 type
 # Try distinct types rather than object variants (tagged unions) which need distinct field names.
-  OrdinalScale[D, R] = OrderedTable[D, R]
+  OrdinalScale*[D, R] = OrderedTable[D, R]
   ThresholdScale[D, R] = tuple
     domain: seq[D]
     range: seq[R]
   Bounds[T] = tuple
     lower, upper: Option[T]
-  LinearScale[D, R] = object
+  LinearScale*[D, R] = object
     domain: Bounds[D]
     range: Bounds[R]
     # y = mx + b

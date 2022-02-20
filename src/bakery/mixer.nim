@@ -4,7 +4,7 @@ import std / [options, tables, sugar, stats, sequtils]
 import ingredients
 
 type
-  Pair[X, Y] = tuple[x: X, y: Y]
+  Pair*[X, Y] = tuple[x: X, y: Y]
   Grouped[K, V] = OrderedTable[K, seq[V]]
 
 iterator points*[X, Y](sh: Shopping; x, y: string): Pair[Option[X], Option[Y]] =
