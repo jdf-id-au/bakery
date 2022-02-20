@@ -49,9 +49,8 @@ func linearScale*[D, R](d: Bounds[D], r: Bounds[R]): LinearScale[R] =
   ## Calculate scale and offset according to supplied "bounds" (really reference points).
   ## If one lower and one upper bound is defined, flip using lower + delta -> upper - delta.
   let invalidRange = newException(RangeDefect, "Invalid range combination: " & $d & ", " & $r)
-  var
-    m: float
-    b: R
+
+  var m: float
   if d.lower.isSome:
      if d.upper.isSome: # may flip if r bounds in reverse order
        if r.lower.isNone and r.upper.isNone:
@@ -65,25 +64,25 @@ func linearScale*[D, R](d: Bounds[D], r: Bounds[R]): LinearScale[R] =
   else:
     m = 1.0
   result.m = m
-  # proc calcB(r: R, d: D): R =
-  #   R(r.float - d.float * m)
+  
+  proc b(r: Option[R], d: Option[D]): R =
+    R(r.get.float - d.get.float * m)
   if d.lower.isSome:               
     if r.lower.isSome:
-      b = R(r.lower.get.float - d.lower.get.float * result.m)
-    elif r.upper.isSome: # flip only
-      b = R(r.upper.get.float - d.lower.get.float * result.m)
+      result.b = b(r.lower, d.lower)
+    elif r.upper.isSome: # flip
+      result.b = b(r.upper, d.lower)
     else:
       raise invalidRange
   elif d.upper.isSome:
     if r.upper.isSome:
-      b = R(r.upper.get.float - d.upper.get.float * result.m)
-    elif r.lower.isSome:
-      b = R(r.lower.get.float - d.upper.get.float * result.m)
+      result.b = b(r.upper, d.upper)
+    elif r.lower.isSome: # flip
+      result.b = b(r.lower, d.upper)
     else:
       raise invalidRange
   else:
-    b = R(0)
-  result.b = b
+    result.b = R(0)
                
 func `~=`*[T: SomeFloat](x, y: T): bool =
   almostEqual(x, y)
