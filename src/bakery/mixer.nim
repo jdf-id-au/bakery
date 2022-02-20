@@ -39,7 +39,9 @@ template groupBy*[V, G](s: iterable[V], f: proc(a: V): G): Grouped[G, V] =
 #   return groupBy(s.items, f)
 # proc key*[K, V](p: Pair[K, V]): K =
 #   p.x
-
+proc cmpKey*[K, V](a,b: (K, V)): int =
+  cmp(a[0], b[0])
+  
 func groupByKey*[K, V](a: openArray[Pair[K, V]]): Grouped[K, V] =
   for (k, v) in a:
     if result.hasKey(k):

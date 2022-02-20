@@ -26,8 +26,8 @@ proc bake*(sh: Shopping): string =
     d = (w: 1000, h: 500) # dimension
     m = (t: 30, r: 150, b: 0, l: 20) # margin
     s = (w: d.w + m.l + m.r, h: d.h + m.t + m.b) # svg
-    X = linearScale(bounds(0.0, 1.0), bounds(0, d.w))
-    Y = linearScale(bounds(0.0, 1.0), bounds(0, d.h))
+    X = linearScale(bounds(0.0, 1.0), bounds(0.float, d.w.float))
+    Y = linearScale(bounds(0.0, 1.0), bounds(0.float, d.h.float))
   let
     ps = points[int, float](sh, "ANAESTHETIST", "TEMPERATURE_INITIAL").toSeq
     dataCount = ps.len
@@ -48,8 +48,11 @@ proc bake*(sh: Shopping): string =
     
     proc binTemp(t: float): float =
       tempBins.bin(t)
-      
-    for (layer, lvals) in vals.someitems.groupBy(binTemp).pairs:
+
+    var binned = vals.someitems.groupBy(binTemp)
+    binned.sort(cmpKey) # sorts in place and returns nothing! I keep forgetting!
+    
+    for (layer, lvals) in binned.pairs:
       let
         layerEntryCount = lvals.len
         x = colOffset.float/dataCount.float
@@ -61,7 +64,7 @@ proc bake*(sh: Shopping): string =
         yy = y + mh2 # ...and add to y offset so box is vertically centred.
         hh = h - missingHeight # reduce height correspondingly
       marks.add(Mark[Option[int], float](x: x, y: 1.0-(yy+hh), w: w, h: h, c: col, l: layer))
-
+      layerOffset += layerEntryCount
     colOffset += entryCount
   
   let vnode = buildHtml(svg(width="100%", viewBox=fmt"{-m.l} {-m.t} {s.w} {s.h}")):
