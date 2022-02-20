@@ -14,8 +14,8 @@ type
   Bounds[T] = tuple
     lower, upper: Option[T]
   LinearScale*[D, R] = object
-    domain: Bounds[D]
-    range: Bounds[R]
+    domain*: Bounds[D]
+    range*: Bounds[R]
     # y = mx + b
     m: float
     b: R
@@ -140,3 +140,6 @@ proc clampScale*[D, R](s: LinearScale[D, R], x: D): R =
     s.scale(u.get)
   else:
     s.scale(x)
+
+func centre*[T](b: Bounds[T]): T =
+  (b.upper.get - b.lower.get)/2 + b.lower.get

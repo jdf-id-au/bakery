@@ -103,8 +103,8 @@ proc shop*(paths: seq[string]): Shopping = # `func` probably wouldn't allow `deb
       let c = fs.readChar
       if c != '\0':
         loaded.add(c)
-      else:
-        debug "NUL at byte ", fs.getPosition, " in ", p # Thanks Cerner
+      # else:
+      #   debug "NUL at byte ", fs.getPosition, " in ", p # Thanks Cerner
     fs.close
     var ss = loaded.newStringStream
     cp.open(ss, p)

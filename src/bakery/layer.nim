@@ -63,9 +63,19 @@ proc layerPlot*[K, V, B](ps: seq[Pair[Option[K], Option[V]]],
            #`data-c` = c, `data-l` = $m.l, `data-n` = $m.n
       )#: title: text fmt"{m.n} cases"
   
-proc labelLayerPlot*[B](m: Margin,
-                        X, Y: LinearScale[float, float],
+proc labelLayerPlot*[B](title, x, y: string;
+                        m: Margin;
+                        X, Y: LinearScale[float, float];
                         C, L: OrdinalScale[B, string]): VNode =
+    let
+      top = -m.t/4
+      right = X.range.upper.get + m.r/4
+      bottom = Y.range.upper.get + m.b*3/4
+      left = X.range.lower.get - m.l/4
     buildHtml(g(class = "labels")):
       # special case `stext` from karax/vdom
+      stext(x = $0, y = $top): text title
+      stext(x = $X.range.centre, y = $bottom, class = "x-label"): text fmt"proportion by {x}"
+      stext(x = $left, y = $Y.range.centre, class = "y-label", transform = fmt"rotate(-90 {left} {Y.range.centre})"):
+        text fmt"proportion by {y}"
 #      g(transform = fmt"translate(0, {Y.range.upper.get + m.b"
