@@ -2,7 +2,7 @@
 
 import std / [json, options, tables, strformat, sugar]
 import karax / [karaxdsl, vdom]
-import .. / bakery / [mixer, measure]
+import .. / bakery / [mixer, measure, decorate]
 
 type
   Mark[C,L] = object
@@ -52,18 +52,21 @@ proc layerPlot*[K, V, B](ps: seq[Pair[Option[K], Option[V]]],
       layerOffset += layerEntryCount
     colOffset += entryCount
 
-  proc f(v:float): string =
-    fmt"{v:.1f}"
-        
   buildHtml(g(class = "marks")):
     for m in marks:
       let c = if m.c.isSome: $m.c.get else: ""
-      rect(x = X.scale(m.x).f, y = Y.scale(m.y).f,
-           width = X.scale(m.w).f, height = Y.scale(m.h).f, fill = C.bin(m.l),
+      rect(x = X.scale(m.x).f1, y = Y.scale(m.y).f1,
+           width = X.scale(m.w).f1, height = Y.scale(m.h).f1, fill = C.bin(m.l),
            #`data-c` = c, `data-l` = $m.l, `data-n` = $m.n
       )#: title: text fmt"{m.n} cases"
-  
-proc labelLayerPlot*[B](title, x, y: string;
+
+proc plotLegend*[B](transform: string; C, L: OrdinalScale[B, string]): VNode =
+  let box = 20 # TODO configurable?
+  buildHtml(g(class = "labels", transform = transform)):
+    for (i, p) in C.pairs.toSeq.pairs:
+      rect(x = $0, y = $(box * (C.len - 1 - i)), width = $box, height = $box, fill = p[1])
+
+proc plotLabels*[B](title, x, y: string;
                         m: Margin;
                         X, Y: LinearScale[float, float];
                         C, L: OrdinalScale[B, string]): VNode =
@@ -72,10 +75,11 @@ proc labelLayerPlot*[B](title, x, y: string;
       right = X.range.upper.get + m.r/4
       bottom = Y.range.upper.get + m.b*3/4
       left = X.range.lower.get - m.l/4
+      padding = 20
     buildHtml(g(class = "labels")):
       # special case `stext` from karax/vdom
       stext(x = $0, y = $top): text title
-      stext(x = $X.range.centre, y = $bottom, class = "x-label"): text fmt"proportion by {x}"
-      stext(x = $left, y = $Y.range.centre, class = "y-label", transform = fmt"rotate(-90 {left} {Y.range.centre})"):
+      stext(x = $X.range.centre, y = $bottom, class = "x"): text fmt"proportion by {x}"
+      stext(x = $left, y = $Y.range.centre, class = "y", transform = fmt"rotate(-90 {left} {Y.range.centre})"):
         text fmt"proportion by {y}"
-#      g(transform = fmt"translate(0, {Y.range.upper.get + m.b"
+      plotLegend(transform = fmt"translate({X.range.upper.get.int + padding} 0)", C, L)

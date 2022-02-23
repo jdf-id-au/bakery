@@ -28,6 +28,6 @@ proc bake*(sh: Shopping): string =
 
   let vnode = buildHtml(svg(width="100%", viewBox=fmt"{-m.l} {-m.t} {s.w} {s.h}")):
     layerPlot(ps, someValsMean, (t) => tempBins.bin(t), X, Y, tempRepr)
-    labelLayerPlot("Initial temperature", "anaesthetist", "temperature", m, X, Y, tempRepr, tempRepr)
+    plotLabels("Initial temperature", "anaesthetist", "temperature", m, X, Y, tempRepr, tempRepr)
   
   result = $vnode
