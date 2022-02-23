@@ -62,9 +62,13 @@ proc layerPlot*[K, V, B](ps: seq[Pair[Option[K], Option[V]]],
 
 proc plotLegend*[B](transform: string; C, L: OrdinalScale[B, string]): VNode =
   let box = 20 # TODO configurable?
-  buildHtml(g(class = "labels", transform = transform)):
+  buildHtml(g(class = "legend", transform = transform)):
     for (i, p) in C.pairs.toSeq.pairs:
-      rect(x = $0, y = $(box * (C.len - 1 - i)), width = $box, height = $box, fill = p[1])
+      let
+        y = box * (C.len - 1 - i)
+        ly = y.float + box/2
+      rect(x = $0, y = $y, width = $box, height = $box, fill = p[1])
+      stext(x = $(box.float * 1.5), y = $ly): text p[1]
 
 proc plotLabels*[B](title, x, y: string;
                         m: Margin;
