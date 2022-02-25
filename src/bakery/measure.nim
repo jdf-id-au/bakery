@@ -30,7 +30,13 @@ func ordinalScale*[D, R](d: seq[D], r: seq[R]): OrdinalScale[D, R] =
   
 func ordinalScale*[T, D, R](s: ThresholdScale[T, D], r: seq[R]): OrdinalScale[D, R] =
   ordinalScale(s.range, r)
-  
+
+func domain*[D, R](s: OrdinalScale[D, R]): seq[D] =
+  s.keys.toSeq
+
+func range*[D, R](s: OrdinalScale[D, R]): seq[R] =
+  s.values.toSeq
+                                   
 func thresholdScale*[D, R](d: seq[D], r: seq[R]): ThresholdScale[D, R] =
   doAssert d.len == r.len - 1
   result.domain = d
@@ -56,7 +62,7 @@ func upperBound*[T](v: T): Bounds[T] =
   
 func linearScale*[D, R](d: Bounds[D], r: Bounds[R]): LinearScale[D, R] =
   ## Calculate scale and offset according to supplied "bounds" (really reference points).
-  ## If one lower and one upper bound is defined, flip using lower + delta -> upper - delta.
+  ## If one domain bound and the other range bound is defined, flip using db + delta -> rb - delta.
   let invalidRange = newException(RangeDefect, "Invalid range combination: " & $d & ", " & $r)
   
   if d.lower.isSome and d.upper.isSome:
@@ -121,6 +127,11 @@ func bin*[D, R](s: ThresholdScale[D, R], v: D): R =
       return s.range[i]
   return s.range[^1]
 
+proc label*[D, R](s: ThresholdScale[D, R]): OrdinalScale[D, string] =
+  var labels = collect(for step in s.range[0..^2]: fmt"≤ {step}")
+  labels.add(fmt"> {s.range[^1]}")
+  ordinalScale(s.range, labels)
+  
 func bin*[D, R](s: OrdinalScale[D, R], v: D): R {.raises: [KeyError].} =
   return s[v]
   

@@ -9,6 +9,7 @@ const
   tempRepr = ordinalScale(tempBins,
     ["#4575b4", "#74add1", "#abd9e9", "#e0f3f8", "#ffffbf",
      "#fee090", "#fdae61", "#f46d43", "#d73027"].toSeq)
+  tempLabels = label(tempBins)
   painBins = thresholdScale(steps(0.5, 1.0), steps(0, 1, 11))
   painRepr = ordinalScale(painBins,
     ["#006837", "#1a9850", "#66bd63", "#a6d96a", "#d9ef8b",
@@ -28,6 +29,6 @@ proc bake*(sh: Shopping): string =
 
   let vnode = buildHtml(svg(width="100%", viewBox=fmt"{-m.l} {-m.t} {s.w} {s.h}")):
     layerPlot(ps, someValsMean, (t) => tempBins.bin(t), X, Y, tempRepr)
-    plotLabels("Initial temperature", "anaesthetist", "temperature", m, X, Y, tempRepr, tempRepr)
+    plotLabels("Initial temperature", "anaesthetist", "temperature", m, X, Y, tempRepr, tempLabels, "°C")
   
   result = $vnode

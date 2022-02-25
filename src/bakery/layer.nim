@@ -60,20 +60,23 @@ proc layerPlot*[K, V, B](ps: seq[Pair[Option[K], Option[V]]],
            #`data-c` = c, `data-l` = $m.l, `data-n` = $m.n
       )#: title: text fmt"{m.n} cases"
 
-proc plotLegend*[B](transform: string; C, L: OrdinalScale[B, string]): VNode =
-  let box = 20 # TODO configurable?
+proc plotLegend*[B](transform: string; C, L: OrdinalScale[B, string]; unit: string): VNode =
+  let
+    box = 20 # TODO configurable?
+    x = box.float * 1.5
+  proc y(i: int): int = box * (C.len - 1 - i) # highest value at top
+  proc ly(i: int): float = y(i).float + box/2
   buildHtml(g(class = "legend", transform = transform)):
-    for (i, p) in C.pairs.toSeq.pairs:
-      let
-        y = box * (C.len - 1 - i)
-        ly = y.float + box/2
-      rect(x = $0, y = $y, width = $box, height = $box, fill = p[1])
-      stext(x = $(box.float * 1.5), y = $ly): text p[1]
+    for (i, c, l) in collect(for i in 0..<C.len: (i, C.range[i], L.range[i])):
+      rect(x = $0, y = $y(i), width = $box, height = $box, fill = c)
+      stext(x = $x, y = $ly(i)): text l
+    stext(x = $x, y = $ly(-1)): text unit
 
 proc plotLabels*[B](title, x, y: string;
                         m: Margin;
                         X, Y: LinearScale[float, float];
-                        C, L: OrdinalScale[B, string]): VNode =
+                        C, L: OrdinalScale[B, string],
+                        unit: string): VNode =
     let
       top = -m.t/4
       right = X.range.upper.get + m.r/4
@@ -86,4 +89,4 @@ proc plotLabels*[B](title, x, y: string;
       stext(x = $X.range.centre, y = $bottom, class = "x"): text fmt"proportion by {x}"
       stext(x = $left, y = $Y.range.centre, class = "y", transform = fmt"rotate(-90 {left} {Y.range.centre})"):
         text fmt"proportion by {y}"
-      plotLegend(transform = fmt"translate({X.range.upper.get.int + padding} 0)", C, L)
+      plotLegend(transform = fmt"translate({X.range.upper.get.int + padding} 0)", C, L, unit)
