@@ -1,4 +1,4 @@
-import std / math
+import std / [math, times, options]
 import bakery / measure
 
 block intThreshold:
@@ -19,6 +19,17 @@ block floatIntThreshold:
   let s = thresholdScale(steps(-0.5,1.0), steps(0,1,5))
   doAssert s.bin(1.5) == 2, "Simulate round for positive numbers."
 
+block autoDatetimeFloatLinear:
+  let s = linearScale(@[dateTime(2020, mJan, 20), dateTime(2021, mDec, 10), dateTime(2021, mFeb, 3)], bounds(0.0, 1.0))
+  doAssert s.domain.lower == some(dateTime(2020, mJan, 20))
+  doAssert s.domain.upper == some(dateTime(2021, mDec, 10))
+
+block autoIntFloatLinear:
+  let s = linearScale(@[3,1,2,5], bounds(0.0, 1.0))
+  doAssert s.domain.lower == some(1)
+  doAssert s.domain.upper == some(5)
+  doAssert s.scale(3) ~= 0.5
+  
 # TODO reformat these as above:
 let
   ifLS = linearScale(bounds(10, 20), bounds(5.0, 55.0))

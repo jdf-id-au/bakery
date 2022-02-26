@@ -1,6 +1,7 @@
 ## Scale and bin (pale imitation of d3js).
 
-import std / [sequtils, tables, options, sugar, math, strformat, logging]
+import std / [sequtils, tables, options, sugar, math, strformat, logging, times]
+import temper
 
 # Can imagine needing to refactor completely once requirements expand.
 # Only implement exactly what's needed at this stage to minimise busywork.
@@ -109,6 +110,22 @@ func linearScale*[D, R](d: Bounds[D], r: Bounds[R]): LinearScale[D, R] =
   else:
     result.b = R(0)
 
+func linearScale*[D, R](a: openArray[D], r: Bounds[R]): LinearScale[D, R] =
+  ## Calculate scale with automatic domain.
+  var
+    min, max: D
+    first = true
+  for v in a:
+    if first or v < min:
+      min = v
+    if first or v > max:
+      max = v
+    first = false
+  linearScale((lower: some(min), upper: some(max)), r)
+
+func linearScale*[D, R](a: openArray[Option[D]], r: Bounds[R]): LinearScale[D, R] =
+  linearScale(a.someitems.toSeq, r)
+    
 func `~=`*[T: SomeFloat](x, y: T): bool =
   almostEqual(x, y)
   
