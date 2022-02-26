@@ -14,7 +14,6 @@ requires "nim >= 1.6.0"
 requires "mustache >= 0.4.3"
 requires "karax >= 1.2.1"
 requires "chroma >= 0.2.5"
-requires "itertools >= 0.4.0"
 
 # Tasks
 
@@ -25,3 +24,5 @@ task viewer, "Compile viewer.":
 # Default `nimble test` runs `tests/t*.nim`.
 # Alternative is `testament pattern "tests/*.nim"`.
 # Note `tests/nim.cfg` to set path.
+
+# Build-and-run given binary with args `nimble run bakery data/*`.

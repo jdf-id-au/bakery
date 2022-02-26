@@ -1,27 +1,23 @@
 import std / math
 import bakery / measure
 
-proc intThreshold() =
+block intThreshold:
   let s = thresholdScale(steps(0,1,5))
   doAssert s.domain == @[0,1,2,3], "Set domain from range."
   doAssert s.bin(-1) == 0, "Handle below domain."
   doAssert s.bin(10) == 4, "Handle above domain."
-intThreshold()
 
-proc floatThreshold() =
+block floatThreshold:
   let s = thresholdScale(steps(0.0,0.5,10))
   doAssert s.bin(3.0) ~= 3.0, "Bin float sanely."
-floatThreshold()
 
-proc intIntThreshold() =
+block intIntThreshold:
   let s = thresholdScale(steps(0,1), steps(0,1,5))
   doAssert s.bin(3) == 3, "Bin int sanely."
-intIntThreshold()
 
-proc floatIntThreshold() =
+block floatIntThreshold:
   let s = thresholdScale(steps(-0.5,1.0), steps(0,1,5))
   doAssert s.bin(1.5) == 2, "Simulate round for positive numbers."
-floatIntThreshold()
 
 # TODO reformat these as above:
 let

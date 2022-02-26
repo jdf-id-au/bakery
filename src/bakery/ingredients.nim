@@ -1,7 +1,7 @@
 ## Coerce CSV data into JSON array of arrays of more-or-less typed values, with support for column accessors.
 
 import std / [streams, parsecsv, json, logging]
-import std / [strutils, sequtils, options, sugar, sets, math]
+import std / [strutils, strformat, sequtils, options, sugar, sets, math]
 
 type
   Row = seq[string]
@@ -127,7 +127,12 @@ proc shop*(paths: seq[string]): Shopping = # `func` probably wouldn't allow `deb
     nodes.add(%row)
 
   return Shopping(data: %nodes, headers: headers)
-  
+
+proc accessors*(sh: Shopping): string =
+  for i, h in sh.headers.pairs:
+    var comma = if i!=sh.headers.high: "," else: ""
+    result.add(fmt"{h}=a=>a[{i}]{comma}")
+
 func get*[T](sh: Shopping, row: JsonNode, col: string): Option[T] =
   assert row.kind == JArray
   let i = sh.headers.find(col)

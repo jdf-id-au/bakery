@@ -2,7 +2,7 @@
 
 import std / [json, options, tables, strformat, sugar]
 import karax / [karaxdsl, vdom]
-import .. / bakery / [mixer, measure, decorate]
+import .. / .. / bakery / [mixer, measure, decorate] # is this idiomatic?
 
 type
   Mark[C,L] = object

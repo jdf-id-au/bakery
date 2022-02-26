@@ -2,7 +2,8 @@
 
 import std / [json, options, tables, strformat, sequtils, sugar]
 import karax / [karaxdsl, vdom]
-import .. / bakery / [ingredients, mixer, measure, layer]
+import .. / bakery / [ingredients, mixer, measure]
+import .. / bakery / plots / [layer]
 
 const
   tempBins = thresholdScale(steps(34.5, 0.5, 9))
