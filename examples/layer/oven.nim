@@ -1,9 +1,10 @@
 ## Render static visualisation, to be picked up by DOM manipulation when js available.
 
-import std / [json, options, tables, strformat, sequtils, sugar]
+import std / [os, json, options, tables, strformat, sequtils, sugar]
 import karax / [karaxdsl, vdom]
-import .. / bakery / [ingredients, mixer, measure]
-import .. / bakery / plots / [layer]
+import mustache
+import .. / .. / bakery / [ingredients, mixer, measure]
+import .. / .. / bakery / plots / layer
 
 const
   tempBins = thresholdScale(steps(34.5, 0.5, 9))
@@ -33,3 +34,19 @@ proc bake*(sh: Shopping): string =
     plotLabels("Initial temperature", "anaesthetist", "temperature", m, X, Y, tempRepr, tempLabels, "°C")
   
   result = $vnode
+
+const
+  templ = staticRead("platter.html")
+  script = staticRead("service.js")
+
+when isMainModule:
+  let
+    shopping = shop(commandLineParams())
+    ctx = newContext()
+  ctx["title"] = "Proof of concept"
+  ctx["accessors"] = shopping.accessors
+  ctx["data"] = $shopping.data
+  ctx["noscript"] = "Static preview. Please download and view in a web browser for full interactivity."
+  ctx["static"] = shopping.bake
+  ctx["script"] = script
+  writeFile("output" / "layer.html", render(templ, ctx))
