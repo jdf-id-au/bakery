@@ -1,13 +1,11 @@
 import std / [os, strformat]
 import mustache
-import bakery / ingredients
-import examples / oven
+import .. / bakery / ingredients
+import oven
 
 const
-  templateDir = "../templates"
-  buildDir = "../build"
-  tin = staticRead(templateDir / "tin.html")
-  script = staticRead(buildDir / "viewer.js")
+  templ = staticRead("layer.html")
+  script = staticRead("viewer.js")
 
 when isMainModule:
   let
@@ -19,4 +17,4 @@ when isMainModule:
   ctx["noscript"] = "Static preview. Please download and view in a web browser for full interactivity."
   ctx["static"] = shopping.bake
   ctx["script"] = script
-  writeFile("output" / "out.html", render(tin, ctx))
+  writeFile("output" / "layer.html", render(templ, ctx))

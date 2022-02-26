@@ -4,9 +4,6 @@ version       = "0.1.0"
 author        = "Jeremy Field"
 description   = "Create self-contained data visualisations"
 license       = "MIT"
-srcDir        = "src"
-bin           = @["bakery"]
-
 
 # Dependencies
 
@@ -18,11 +15,11 @@ requires "chroma >= 0.2.5"
 # Tasks
 
 task viewer, "Compile viewer.":
-  #exec("nimble -d:release -o:build/viewer.js js src/examples/viewer")
-  exec("nimble -o:build/viewer.js js src/examples/viewer")
-
+  #exec("nimble -d:release js examples/viewer")
+  exec("nimble js examples/viewer")
+  
 # Default `nimble test` runs `tests/t*.nim`.
 # Alternative is `testament pattern "tests/*.nim"`.
 # Note `tests/nim.cfg` to set path.
 
-# Build-and-run given binary with args `nimble run bakery data/*`.
+# `nim r examples/layer.nim data/*`
