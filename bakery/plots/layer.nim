@@ -11,13 +11,13 @@ type
     l: L
     n: int
 
-proc layerPlot*[K, V, B](ps: seq[Pair[Option[K], Option[V]]],
-                         # TODO contemplate whether to pass in colBin and layerSort
-                         colSort: ((Option[K], seq[Option[V]]),
-                                   (Option[K], seq[Option[V]])) -> int,
-                         layerBin: (V) -> B,
-                         X, Y: LinearScale[float, float],
-                         C: OrdinalScale[B, string]): VNode =
+proc plot*[K, V, B](ps: seq[Pair[Option[K], Option[V]]],
+                    # TODO contemplate whether to pass in colBin and layerSort
+                    colSort: ((Option[K], seq[Option[V]]),
+                              (Option[K], seq[Option[V]])) -> int,
+                    layerBin: (V) -> B,
+                    X, Y: LinearScale[float, float],
+                    C: OrdinalScale[B, string]): VNode =
   ## Return an svg `g` node containing whole plot.
   let dataCount = ps.len
   var groupedPoints = ps.groupValsByKey
@@ -72,7 +72,7 @@ proc plotLegend*[B](transform: string; C, L: OrdinalScale[B, string]; unit: stri
       stext(x = $x, y = $ly(i)): text l
     stext(x = $x, y = $ly(-1)): text unit
 
-proc plotLabels*[B](title, x, y: string;
+proc labels*[B](title, x, y: string;
                         m: Margin;
                         X, Y: LinearScale[float, float];
                         C, L: OrdinalScale[B, string],
@@ -89,4 +89,5 @@ proc plotLabels*[B](title, x, y: string;
       stext(x = $X.range.centre, y = $bottom, class = "x"): text fmt"proportion by {x}"
       stext(x = $left, y = $Y.range.centre, class = "y", transform = fmt"rotate(-90 {left} {Y.range.centre})"):
         text fmt"proportion by {y}"
+      # `legend` collided with `karax/vdom` `VNodeKind.legend`; unsure how to resolve
       plotLegend(transform = fmt"translate({X.range.upper.get.int + padding} 0)", C, L, unit)

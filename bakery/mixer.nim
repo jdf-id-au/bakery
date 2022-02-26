@@ -5,13 +5,18 @@ import ingredients
 
 type
   Pair*[X, Y] = tuple[x: X, y: Y]
+  Triple*[X, Y, Z] = tuple[x: X, y: Y, z: Z]
   Grouped[K, V] = OrderedTable[K, seq[V]]
 
 iterator points*[X, Y](sh: Shopping; x, y: string): Pair[Option[X], Option[Y]] =
-  ## TODO generalise to >2 vals? varargs and typedesc?
   for r in sh.data.getElems:
     yield ((get[X](sh, r, x), get[Y](sh, r, y)))
 
+iterator points*[X, Y, Z](sh: Shopping; x, y, z: string): Triple[Option[X], Option[Y], Option[Z]] =
+  ## TODO generalise for n vals! varargs and typedesc?
+  for r in sh.data.getElems:
+    yield ((get[X](sh, r, x), get[Y](sh, r, y), get[Z](sh, r, z)))
+    
 iterator someitems*[T](a: openArray[Option[T]]): T =
   # TODO learn about lent2 and {.inline.}
   for v in a:

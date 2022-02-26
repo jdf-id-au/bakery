@@ -108,7 +108,7 @@ func linearScale*[D, R](d: Bounds[D], r: Bounds[R]): LinearScale[D, R] =
       raise invalidRange
   else:
     result.b = R(0)
-               
+
 func `~=`*[T: SomeFloat](x, y: T): bool =
   almostEqual(x, y)
   
@@ -153,4 +153,5 @@ proc clampScale*[D, R](s: LinearScale[D, R], x: D): R =
     s.scale(x)
 
 func centre*[T](b: Bounds[T]): T =
+  ## Layout convenience.
   (b.upper.get - b.lower.get)/2 + b.lower.get

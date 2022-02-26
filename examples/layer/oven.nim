@@ -30,10 +30,10 @@ proc bake*(sh: Shopping): string =
     ps = points[int, float](sh, "ANAESTHETIST", "TEMPERATURE_INITIAL").toSeq
 
   let vnode = buildHtml(svg(width="100%", viewBox=fmt"{-m.l} {-m.t} {s.w} {s.h}")):
-    layerPlot(ps, someValsMean, (t) => tempBins.bin(t), X, Y, tempRepr)
-    plotLabels("Initial temperature", "anaesthetist", "temperature", m, X, Y, tempRepr, tempLabels, "°C")
+    layer.plot(ps, someValsMean, (t) => tempBins.bin(t), X, Y, tempRepr)
+    layer.labels("Initial temperature", "anaesthetist", "temperature", m, X, Y, tempRepr, tempLabels, "°C")
   
-  result = $vnode
+  $vnode
 
 const
   templ = staticRead("platter.html")

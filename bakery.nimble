@@ -11,6 +11,7 @@ requires "nim >= 1.6.0"
 requires "mustache >= 0.4.3"
 requires "karax >= 1.2.1"
 requires "chroma >= 0.2.5"
+requires "temper"
 
 # Default `nimble test` runs `tests/t*.nim`.
 # Alternative is `testament pattern "tests/*.nim"`.
